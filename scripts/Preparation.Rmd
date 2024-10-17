@@ -1,0 +1,56 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-10-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Starting point is to give them a couple of sequences from an Influenza virus. The idea of the first part is to identify which genus of Influenza they are from and whether they are related (come from the same outbreak) or are two independent infections. 
+
+
+
+Get even sampling of Influenzavirus genera for initial phylogenetic tree:
+* Sample a max of 200 so tree is feasible
+* Ideally, subsample by host/region/...
+
+## Data generation
+
+```{r}
+library(tidyverse); library(rentrez); library(phylotools)
+metadata <- read.csv("../data/NCBImetadata.tsv", sep="\t")
+df <- data.frame(table(metadata$Protein))
+
+selected <- metadata %>% filter(Protein == "nucleocapsid protein") %>% group_by(Species) %>% slice_sample(n=50) 
+accessions <- selected %>% pull(Accession)
+
+metadata %>% filter(!(Accession %in% accessions)) %>% filter(Protein == "nucleocapsid protein")
+
+seqs <- entrez_fetch(db="protein", id=accessions, rettype="fasta")
+write(seqs, file="../data/SpeciesSubsample.fasta")
+
+seqs <- entrez_fetch(db="protein", id=c("QUP79945", "QUP79957", "QUQ73293", "QUQ73305"), rettype="fasta")
+write(seqs, file="../data/Myseqs.fasta")
+
+fasta <- read.fasta("../data/SpeciesSubsample.fasta")
+fasta$seq.name <- gsub(" .*", "", fasta$seq.name)
+fasta$seq.name <- 
+dat2fasta(fasta,"../data/SpeciesSubsample.fasta" )
+```
+
+
+```{r}
+library(ggtree)
+tree <- read.tree("../data/Tree1.tree")
+tree$tip.label <- gsub("\\.[0-9]", "", tree$tip.label)
+ggtree(tree, layout="daylight") %<+% metadata  + geom_tippoint(aes(color=Species)) 
+
+```
+
+```{r}
+selected <- metadata %>% filter(Species == "Alphainfluenzavirus influenzae") %>% filter(Protein == "hemagglutinin") %>% group_by(Species) %>% slice_sample(n=50) 
+accessions <- selected %>% pull(Accession)
+```
+
