@@ -1,7 +1,7 @@
 Untitled
 ================
 
-# BOJOS PER LA BIOMEDICINA 2024
+# BOJOS PER LA BIOMEDICINA 2025
 
 All species on Earth are under constant change. Over generations, the
 DNA molecules of individuals within a population will undergo random
